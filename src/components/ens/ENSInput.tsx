@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { AtSign, CheckCircle, AlertCircle } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
 import { useEnsPaymentProfile } from '@/hooks/useEnsPaymentProfile';
@@ -13,20 +14,31 @@ interface ENSInputProps {
 
 export function ENSInput({ value, onChange, onResolve }: ENSInputProps) {
   const { data: profile, isLoading, error } = useEnsPaymentProfile(value);
+  const lastResolvedRef = useRef<PaymentProfile | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toLowerCase();
     onChange(newValue);
     if (!newValue.endsWith('.eth')) {
       onResolve(null);
+      lastResolvedRef.current = null;
     }
   };
 
-  if (profile && !isLoading && !error) {
-    onResolve(profile);
-  } else if (error || (!profile && !isLoading && value.endsWith('.eth'))) {
-    onResolve(null);
-  }
+  useEffect(() => {
+    let newProfile: PaymentProfile | null = null;
+    
+    if (profile && !isLoading && !error) {
+      newProfile = profile;
+    } else if (error || (!profile && !isLoading && value.endsWith('.eth'))) {
+      newProfile = null;
+    }
+
+    if (newProfile !== lastResolvedRef.current) {
+      lastResolvedRef.current = newProfile;
+      onResolve(newProfile);
+    }
+  }, [profile, isLoading, error, value, onResolve]);
 
   return (
     <div className="space-y-3">

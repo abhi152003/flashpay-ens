@@ -1,9 +1,10 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { sepolia } from 'wagmi/chains';
+import { arcTestnet } from './chains';
 
 export const config = getDefaultConfig({
   appName: 'FlashPay.ens',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
-  chains: [sepolia],
+  chains: [arcTestnet, sepolia],
   ssr: true,
 });
