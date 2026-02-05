@@ -20,7 +20,7 @@ export interface UseYellowNetworkReturn {
 export function useYellowNetwork(): UseYellowNetworkReturn {
   const { address, isConnected: walletConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
-  
+
   const [isConnected, setIsConnected] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -38,17 +38,14 @@ export function useYellowNetwork(): UseYellowNetworkReturn {
 
     try {
       const client = getYellowClient();
-      
-      // Connect to WebSocket
+
       await client.connect();
       setIsConnected(true);
 
-      // Authenticate with EIP-712 signature using wallet client
       await client.authenticate(address, walletClient);
-      
+
       setIsAuthenticated(true);
 
-      // Fetch initial balances
       const fetchedBalances = await client.getBalances();
       setBalances(fetchedBalances);
     } catch (err) {
@@ -70,17 +67,17 @@ export function useYellowNetwork(): UseYellowNetworkReturn {
 
   const transfer = useCallback(async (to: Address, amount: string): Promise<YellowTransfer> => {
     const client = getYellowClient();
-    
+
     if (!client.authenticated) {
       throw new Error('Not authenticated to Yellow Network');
     }
 
-    return client.transfer({ to, amount, asset: 'usdc' });
+    return client.transfer({ to, amount, asset: 'USDC' });
   }, []);
 
   const refreshBalances = useCallback(async () => {
     const client = getYellowClient();
-    
+
     if (!client.authenticated) {
       return;
     }
@@ -93,7 +90,6 @@ export function useYellowNetwork(): UseYellowNetworkReturn {
     }
   }, []);
 
-  // Auto-disconnect when wallet disconnects
   useEffect(() => {
     if (!walletConnected && isConnected) {
       disconnect();

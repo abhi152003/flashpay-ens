@@ -3,6 +3,8 @@ import {
   createAuthVerifyMessageFromChallenge,
   createTransferMessage,
   createGetLedgerBalancesMessage,
+  createGetAssetsMessageV2,
+  parseGetAssetsResponse,
   createEIP712AuthMessageSigner,
   createECDSAMessageSigner,
   parseAnyRPCResponse,
@@ -11,6 +13,7 @@ import {
   parseTransferResponse,
   parseGetLedgerBalancesResponse,
   type MessageSigner,
+  type RPCAsset,
 } from '@erc7824/nitrolite';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import type { Address, Hex, WalletClient } from 'viem';
@@ -48,6 +51,7 @@ class YellowNetworkClient {
   private isAuthenticatedFlag = false;
   private pendingRequests: Map<number, PendingRequest> = new Map();
   private requestIdCounter = 1;
+  private supportedAssets: RPCAsset[] = [];
 
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -78,7 +82,7 @@ class YellowNetworkClient {
   private handleMessage(data: string): void {
     try {
       const response = parseAnyRPCResponse(data);
-      
+
       const requestId = response.requestId;
       if (requestId !== undefined) {
         const pending = this.pendingRequests.get(requestId);
@@ -105,7 +109,35 @@ class YellowNetworkClient {
     }
 
     this.userAddress = address;
-    
+
+    const assetsRequestId = this.requestIdCounter++;
+    const assetsMsg = createGetAssetsMessageV2(undefined, assetsRequestId);
+
+    try {
+      const assetsRaw = await this.sendAndWait(assetsMsg, assetsRequestId);
+      const assetsResponse = parseGetAssetsResponse(assetsRaw);
+      this.supportedAssets = assetsResponse.params.assets || [];
+      console.log('📦 Supported assets:', this.supportedAssets.map(a => `${a.symbol} (${a.token})`));
+    } catch (err) {
+      console.warn('⚠️ Could not fetch assets, proceeding with empty allowances:', err);
+    }
+
+    const stablecoinAsset = this.supportedAssets.find(
+      a => a.symbol.toUpperCase() === 'USDC'
+    ) || this.supportedAssets.find(
+      a => a.symbol.toLowerCase() === 'ytest.usd'
+    );
+
+    const allowances = stablecoinAsset
+      ? [{ asset: stablecoinAsset.symbol, amount: '1000000000' }]
+      : [];
+
+    if (!stablecoinAsset) {
+      console.warn('⚠️ No USD stablecoin found in supported assets, proceeding without allowances');
+    } else {
+      console.log(`✅ Using stablecoin asset: ${stablecoinAsset.symbol}`);
+    }
+
     const sessionPrivateKey = generatePrivateKey();
     const sessionAccount = privateKeyToAccount(sessionPrivateKey);
     this.sessionSigner = createECDSAMessageSigner(sessionPrivateKey);
@@ -114,21 +146,19 @@ class YellowNetworkClient {
       address,
       session_key: sessionAccount.address,
       application: 'flashpay-ens',
-      allowances: [{ asset: 'usdc', amount: '1000000000' }],
-      expires_at: BigInt(Math.floor(Date.now() / 1000) + 86400), // 24 hours
+      allowances,
+      expires_at: BigInt(Math.floor(Date.now() / 1000) + 86400),
       scope: 'flashpay',
     };
 
     const requestId = this.requestIdCounter++;
-    
-    // Step 1: Send auth request to get a challenge
+
     const authRequestMsg = await createAuthRequestMessage(authParams, requestId);
     const challengeRaw = await this.sendAndWait(authRequestMsg, requestId);
     const challengeResponse = parseAuthChallengeResponse(challengeRaw);
-    
+
     const verifyRequestId = this.requestIdCounter++;
-    
-    // Step 2: Sign with MAIN wallet using EIP-712
+
     const eip712Signer = createEIP712AuthMessageSigner(
       walletClient,
       {
@@ -148,7 +178,7 @@ class YellowNetworkClient {
 
     const verifyRaw = await this.sendAndWait(authVerifyMsg, verifyRequestId);
     const verifyResponse = parseAuthVerifyResponse(verifyRaw);
-    
+
     if (verifyResponse.params.success) {
       this.isAuthenticatedFlag = true;
       console.log('✅ Authenticated with Yellow Network');
@@ -182,15 +212,33 @@ class YellowNetworkClient {
       throw new Error('Not authenticated. Call authenticate() first.');
     }
 
+    const assetSymbol = params.asset || 'USDC';
+    let asset = this.supportedAssets.find(
+      a => a.symbol.toUpperCase() === assetSymbol.toUpperCase()
+    );
+
+    if (!asset && assetSymbol.toUpperCase() === 'USDC') {
+      asset = this.supportedAssets.find(
+        a => a.symbol.toLowerCase() === 'ytest.usd'
+      );
+    }
+
+    const assetIdentifier = asset?.symbol || assetSymbol;
+
+    const decimals = asset?.decimals ?? 6;
+
+    const amountInSmallestUnits = (parseFloat(params.amount) * Math.pow(10, decimals)).toFixed(0);
+
+    console.log(`💸 Transferring ${params.amount} ${assetIdentifier} (${amountInSmallestUnits} smallest units) to ${params.to}`);
+
     const requestId = this.requestIdCounter++;
-    
-    // Use session signer for transfers
+
     const transferMsg = await createTransferMessage(this.sessionSigner, {
       destination: params.to,
       allocations: [
         {
-          asset: params.asset || 'usdc',
-          amount: params.amount,
+          asset: assetIdentifier,
+          amount: amountInSmallestUnits,
         },
       ],
     }, requestId);
@@ -198,7 +246,9 @@ class YellowNetworkClient {
     try {
       const resultRaw = await this.sendAndWait(transferMsg, requestId);
       const result = parseTransferResponse(resultRaw);
-      
+
+      console.log('✅ Transfer successful:', result);
+
       return {
         transferId: result.params.transactions?.[0]?.id?.toString() || `ytx-${Date.now()}`,
         status: 'complete',
@@ -219,7 +269,7 @@ class YellowNetworkClient {
 
     const requestId = this.requestIdCounter++;
     const balancesMsg = await createGetLedgerBalancesMessage(this.sessionSigner, undefined, requestId);
-    
+
     try {
       const resultRaw = await this.sendAndWait(balancesMsg, requestId);
       const result = parseGetLedgerBalancesResponse(resultRaw);
@@ -274,7 +324,7 @@ export async function sendOffchainUSDC(params: {
   amount: string;
 }): Promise<YellowTransfer> {
   const client = getYellowClient();
-  
+
   if (!client.authenticated) {
     throw new Error('Yellow Network client not authenticated. Please authenticate first.');
   }
@@ -282,7 +332,7 @@ export async function sendOffchainUSDC(params: {
   return client.transfer({
     to: params.to as Address,
     amount: params.amount,
-    asset: 'usdc',
+    asset: 'USDC',
   });
 }
 

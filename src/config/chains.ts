@@ -34,3 +34,20 @@ export const chainLabels: Record<string, string> = {
   polygon: 'Polygon',
   arbitrum: 'Arbitrum',
 };
+
+export const CCTP_TOKEN_MESSENGER = '0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA' as const;
+export const CCTP_MESSAGE_TRANSMITTER = '0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275' as const;
+
+export const SEPOLIA_USDC_ADDRESS = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238' as const;
+
+export const CCTP_DOMAINS = {
+  'ethereum-sepolia': 0,
+  'avalanche-fuji': 1,
+  'op-sepolia': 2,
+  'arbitrum-sepolia': 3,
+  'base-sepolia': 6,
+  'polygon-amoy': 7,
+  'arc-testnet': 26,
+} as const;
+
+export const CIRCLE_ATTESTATION_API = 'https://iris-api-sandbox.circle.com';

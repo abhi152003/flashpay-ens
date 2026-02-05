@@ -1,18 +1,29 @@
 'use client';
 
-import { useAccount, useBalance } from 'wagmi';
-import { arcTestnet } from '@/config/chains';
+import { useAccount, useBalance, useChainId } from 'wagmi';
+import { arcTestnet, ARC_USDC_ADDRESS } from '@/config/chains';
+import { sepolia } from 'wagmi/chains';
 
-export interface ArcBalance {
+export const SEPOLIA_USDC_ADDRESS = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238' as const;
+
+export interface USDCBalance {
   balance: string;
   formatted: string;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
+  chainName: string;
+  chainId: number;
 }
 
-export function useArcBalance(): ArcBalance {
+export function useArcBalance(): USDCBalance {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+
+  const isArc = chainId === arcTestnet.id;
+  const isSepolia = chainId === sepolia.id;
+
+  const tokenAddress = isSepolia ? SEPOLIA_USDC_ADDRESS : undefined;
 
   const {
     data,
@@ -21,7 +32,8 @@ export function useArcBalance(): ArcBalance {
     refetch,
   } = useBalance({
     address,
-    chainId: arcTestnet.id,
+    token: tokenAddress,
+    chainId: chainId,
     query: {
       enabled: Boolean(address && isConnected),
     },
@@ -34,11 +46,15 @@ export function useArcBalance(): ArcBalance {
     maximumFractionDigits: 2,
   });
 
+  const chainName = isArc ? 'Arc' : isSepolia ? 'Sepolia' : 'Unknown';
+
   return {
     balance,
     formatted,
     isLoading,
     error: error as Error | null,
     refetch,
+    chainName,
+    chainId,
   };
 }
