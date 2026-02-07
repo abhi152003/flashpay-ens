@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Toggle } from '@/components/ui/Toggle';
+import { Card } from '@/components/ui/Card';
+import { CheckCircle2, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
 import { CHAIN_OPTIONS, TEXT_RECORD_KEYS } from '@/config/ens';
 import { chainLabels } from '@/config/chains';
 import { getEnsNameForAddress, resolvePaymentProfile } from '@/services/ens/resolvePaymentProfile';
@@ -113,91 +115,163 @@ export function ProfileSettingsForm() {
 
   if (!isConnected) {
     return (
-      <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-8 text-center">
-        <p className="text-zinc-400">Connect your wallet to manage your payment preferences</p>
-      </div>
+      <Card variant="elevated" padding="lg" className="text-center space-y-3 animate-fade-in">
+        <div className="mx-auto w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center">
+          <AlertCircle className="h-8 w-8 text-text-tertiary" />
+        </div>
+        <div>
+          <p className="font-display font-semibold text-text-primary">
+            Wallet not connected
+          </p>
+          <p className="mt-1 text-sm text-text-secondary">
+            Connect your wallet to manage your payment preferences
+          </p>
+        </div>
+      </Card>
     );
   }
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-8 text-center">
-        <p className="text-zinc-400">Loading your profile...</p>
-      </div>
+      <Card variant="elevated" padding="lg" className="text-center space-y-3 animate-fade-in">
+        <Loader2 className="mx-auto h-8 w-8 text-primary animate-spin" />
+        <p className="text-text-secondary">Loading your profile...</p>
+      </Card>
     );
   }
 
   if (!ensName) {
     return (
-      <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-8 text-center">
-        <p className="mb-2 text-zinc-400">No ENS name found for your address</p>
-        <p className="text-sm text-zinc-500">
-          Set a primary ENS name at{' '}
-          <a href="https://app.ens.domains" className="text-blue-400 hover:underline" target="_blank">
-            app.ens.domains
+      <Card variant="elevated" padding="lg" className="text-center space-y-4 animate-fade-in">
+        <div className="mx-auto w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center">
+          <AlertCircle className="h-8 w-8 text-text-tertiary" />
+        </div>
+        <div>
+          <p className="font-display font-semibold text-text-primary mb-2">
+            No ENS name found
+          </p>
+          <p className="text-sm text-text-secondary mb-4">
+            Set a primary ENS name to configure payment preferences
+          </p>
+          <a 
+            href="https://app.ens.domains" 
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover transition-colors duration-200"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Go to ENS Domains
+            <ExternalLink className="h-4 w-4" />
           </a>
-        </p>
-      </div>
+        </div>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
-      <div className="rounded-xl border border-zinc-700 bg-zinc-800/50 p-4">
-        <p className="text-sm text-zinc-400">Managing preferences for</p>
-        <p className="text-lg font-medium text-white">{ensName}</p>
+    <form onSubmit={handleSave} className="space-y-6 animate-fade-in">
+      {/* ENS Name Display */}
+      <Card variant="elevated" padding="md">
+        <p className="text-sm font-medium text-text-secondary mb-1">
+          Managing preferences for
+        </p>
+        <p className="text-xl font-display font-semibold text-text-primary">
+          {ensName}
+        </p>
+      </Card>
+
+      {/* Form Fields */}
+      <div className="space-y-5">
+        <Input
+          label="Display Name"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Your display name"
+        />
+
+        <Select
+          label="Preferred Settlement Chain"
+          value={chain}
+          onChange={(e) => setChain(e.target.value as ChainPreference)}
+          options={CHAIN_OPTIONS.map((c) => ({ value: c, label: chainLabels[c] }))}
+        />
+
+        <Toggle
+          label="Fast Mode"
+          description="Enable gasless payments via Yellow Network state channels"
+          checked={fastMode}
+          onChange={setFastMode}
+        />
       </div>
 
-      <Input
-        label="Display Name"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-        placeholder="Your display name"
-      />
-
-      <Select
-        label="Preferred Settlement Chain"
-        value={chain}
-        onChange={(e) => setChain(e.target.value as ChainPreference)}
-        options={CHAIN_OPTIONS.map((c) => ({ value: c, label: chainLabels[c] }))}
-      />
-
-      <Toggle
-        label="Fast Mode"
-        description="Enable gasless payments via Yellow Network state channels"
-        checked={fastMode}
-        onChange={setFastMode}
-      />
-
-      <div className="rounded-lg bg-zinc-800/30 p-4 text-sm text-zinc-400">
-        <p className="mb-2 font-medium text-zinc-300">Text records to be updated:</p>
-        <ul className="space-y-1 font-mono text-xs">
-          <li>{TEXT_RECORD_KEYS.PREFERRED_CHAIN}: {chain}</li>
-          <li>{TEXT_RECORD_KEYS.FAST_MODE}: {String(fastMode)}</li>
-          <li>{TEXT_RECORD_KEYS.DISPLAY_NAME}: {displayName || '(empty)'}</li>
+      {/* Text Records Preview */}
+      <Card variant="default" padding="md" className="bg-surface-elevated/50">
+        <p className="text-sm font-medium text-text-secondary mb-3">
+          Text records to be updated:
+        </p>
+        <ul className="space-y-1.5 font-mono text-xs text-text-secondary">
+          <li className="flex items-center gap-2">
+            <span className="text-text-tertiary">•</span>
+            <span>{TEXT_RECORD_KEYS.PREFERRED_CHAIN}:</span>
+            <span className="text-text-primary font-medium">{chain}</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-text-tertiary">•</span>
+            <span>{TEXT_RECORD_KEYS.FAST_MODE}:</span>
+            <span className="text-text-primary font-medium">{String(fastMode)}</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-text-tertiary">•</span>
+            <span>{TEXT_RECORD_KEYS.DISPLAY_NAME}:</span>
+            <span className="text-text-primary font-medium">{displayName || '(empty)'}</span>
+          </li>
         </ul>
-      </div>
+      </Card>
 
+      {/* Status Messages */}
       {currentStep && (
-        <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-400">
-          {currentStep}
-        </div>
+        <Card variant="default" padding="sm" className="border-primary/20 bg-primary/5 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 text-primary animate-spin flex-shrink-0" />
+            <p className="text-sm text-primary">{currentStep}</p>
+          </div>
+        </Card>
       )}
 
       {saveStatus === 'success' && (
-        <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
-          Text records updated successfully!
-        </div>
+        <Card variant="default" padding="sm" className="border-accent-green/20 bg-accent-green/5 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-accent-green flex-shrink-0" />
+            <p className="text-sm text-accent-green font-medium">
+              Text records updated successfully!
+            </p>
+          </div>
+        </Card>
       )}
 
       {saveStatus === 'error' && errorMessage && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
-          {errorMessage}
-        </div>
+        <Card variant="default" padding="sm" className="border-accent-red/20 bg-accent-red/5 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-accent-red flex-shrink-0" />
+            <p className="text-sm text-accent-red">{errorMessage}</p>
+          </div>
+        </Card>
       )}
 
-      <Button type="submit" loading={saveStatus === 'saving'} className="w-full">
-        {saveStatus === 'success' ? 'Saved!' : 'Save Preferences'}
+      {/* Submit Button */}
+      <Button 
+        type="submit" 
+        loading={saveStatus === 'saving'} 
+        className="w-full"
+        size="lg"
+      >
+        {saveStatus === 'success' ? (
+          <>
+            <CheckCircle2 className="h-5 w-5" />
+            Saved!
+          </>
+        ) : (
+          'Save Preferences'
+        )}
       </Button>
     </form>
   );

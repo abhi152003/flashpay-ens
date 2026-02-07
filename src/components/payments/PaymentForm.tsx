@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Send, Zap, Globe, Wallet, AlertCircle, ArrowRightLeft } from 'lucide-react';
+import { Send, Zap, Globe, Wallet, AlertCircle, ArrowRightLeft, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { ENSInput } from '@/components/ens/ENSInput';
 import { useTxStore } from '@/hooks/useTxStore';
 import { useArcBalance } from '@/hooks/useArcBalance';
@@ -149,8 +150,9 @@ export function PaymentForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-400">
+      {/* Recipient Section */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-text-secondary">
           Recipient
         </label>
         <ENSInput
@@ -160,24 +162,29 @@ export function PaymentForm() {
         />
       </div>
 
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium text-zinc-400">Amount</label>
+      {/* Amount Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-text-secondary">Amount</label>
           <div className="flex items-center gap-2 text-sm">
-            <Wallet className="h-4 w-4 text-zinc-500" />
-            <span className="text-zinc-400">
-              {chainName} Balance:{' '}
+            <Wallet className="h-4 w-4 text-text-tertiary" />
+            <span className="text-text-secondary">
+              {chainName}:{' '}
               {balanceLoading ? (
-                <span className="text-zinc-500">...</span>
+                <span className="text-text-tertiary">...</span>
               ) : (
-                <span className="font-medium text-white">{formatted} USDC</span>
+                <span className="font-medium text-text-primary">{formatted} USDC</span>
               )}
             </span>
             <button
               type="button"
               onClick={handleMaxClick}
               disabled={balanceLoading || parseFloat(balance) === 0}
-              className="rounded-md bg-zinc-700 px-2 py-0.5 text-xs font-medium text-white transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="
+                rounded-lg bg-surface-elevated px-2.5 py-1 text-xs font-medium text-text-primary 
+                transition-all duration-200 hover:bg-border hover:shadow-sm active:scale-95
+                disabled:cursor-not-allowed disabled:opacity-50
+              "
             >
               MAX
             </button>
@@ -192,69 +199,111 @@ export function PaymentForm() {
             min="0"
             step="0.01"
             max={balance}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-900 py-4 pl-4 pr-20 text-2xl text-white placeholder-zinc-500 outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="
+              w-full rounded-xl border bg-surface py-4 pl-4 pr-24 text-2xl font-medium text-text-primary 
+              placeholder-text-tertiary outline-none transition-all duration-200
+              focus:border-primary focus:ring-2 focus:ring-primary/20
+              hover:border-border-hover border-border
+            "
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 font-medium text-zinc-400">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-text-secondary">
             USDC
           </span>
         </div>
       </div>
 
+      {/* Payment Route Info */}
       {recipient?.resolvedAddress && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 rounded-lg bg-zinc-800/50 px-3 py-2 text-sm">
-            {recipient.fastMode ? (
-              <>
-                <Zap className="h-4 w-4 text-yellow-500" />
-                <span className="text-zinc-300">
-                  1. Yellow Network (instant)
-                  {yellowConnecting && ' - connecting...'}
-                  {yellowAuthenticated && status !== 'confirming' && ' ✓'}
-                  {status === 'confirming' && cctpStatus === 'idle' && ' - transferring...'}
-                </span>
-              </>
-            ) : (
-              <>
-                <ArrowRightLeft className="h-4 w-4 text-purple-500" />
-                <span className="text-zinc-300">
-                  CCTP Bridge: Sepolia → {recipient.preferredChain === 'arc' ? 'Arc' : recipient.preferredChain}
-                  {cctpStatus !== 'idle' && cctpStatus !== 'complete' && cctpStatus !== 'failed' && (
-                    <span className="ml-2 text-purple-400">({CCTPStatusLabels[cctpStatus]})</span>
+        <div className="space-y-2 animate-fade-in">
+          <Card variant="elevated" padding="sm" className="space-y-2">
+            <div className="flex items-center gap-3 px-2 py-1">
+              {recipient.fastMode ? (
+                <>
+                  <div className="flex-shrink-0 rounded-lg bg-accent-yellow/10 p-2">
+                    <Zap className="h-4 w-4 text-accent-yellow" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-text-primary">
+                      Yellow Network (instant)
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {yellowConnecting && 'Connecting...'}
+                      {yellowAuthenticated && status !== 'confirming' && 'Ready ✓'}
+                      {status === 'confirming' && cctpStatus === 'idle' && 'Transferring...'}
+                    </p>
+                  </div>
+                  {yellowAuthenticated && status !== 'confirming' && (
+                    <CheckCircle2 className="h-4 w-4 text-accent-green flex-shrink-0" />
                   )}
-                </span>
-              </>
-            )}
-          </div>
-
-          {recipient.fastMode && recipient.preferredChain === 'arc' && (
-            <div className="flex items-center gap-2 rounded-lg bg-zinc-800/50 px-3 py-2 text-sm">
-              <ArrowRightLeft className="h-4 w-4 text-purple-500" />
-              <span className="text-zinc-300">
-                2. Settle to Arc via CCTP
-                {cctpStatus !== 'idle' && cctpStatus !== 'complete' && cctpStatus !== 'failed' && (
-                  <span className="ml-2 text-purple-400">({CCTPStatusLabels[cctpStatus]})</span>
-                )}
-                {cctpStatus === 'complete' && <span className="ml-2 text-green-400">✓</span>}
-              </span>
+                </>
+              ) : (
+                <>
+                  <div className="flex-shrink-0 rounded-lg bg-primary/10 p-2">
+                    <ArrowRightLeft className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-text-primary">
+                      CCTP Bridge
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      Sepolia → {recipient.preferredChain === 'arc' ? 'Arc' : recipient.preferredChain}
+                      {cctpStatus !== 'idle' && cctpStatus !== 'complete' && cctpStatus !== 'failed' && (
+                        <span className="ml-1">({CCTPStatusLabels[cctpStatus]})</span>
+                      )}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-          )}
+
+            {recipient.fastMode && recipient.preferredChain === 'arc' && (
+              <div className="flex items-center gap-3 px-2 py-1 border-t border-border/50">
+                <div className="flex-shrink-0 rounded-lg bg-primary/10 p-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text-primary">
+                    Settle to Arc
+                  </p>
+                  <p className="text-xs text-text-secondary">
+                    {cctpStatus !== 'idle' && cctpStatus !== 'complete' && cctpStatus !== 'failed' 
+                      ? `${CCTPStatusLabels[cctpStatus]}`
+                      : 'Via CCTP bridge'}
+                  </p>
+                </div>
+                {cctpStatus === 'complete' && (
+                  <CheckCircle2 className="h-4 w-4 text-accent-green flex-shrink-0" />
+                )}
+              </div>
+            )}
+          </Card>
         </div>
       )}
 
+      {/* Error Messages */}
       {yellowError && recipient?.fastMode && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4" />
-          <span>Yellow Network: {yellowError.message}</span>
-        </div>
+        <Card variant="default" padding="sm" className="border-accent-red/20 bg-accent-red/5 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-accent-red flex-shrink-0" />
+            <p className="text-sm text-accent-red">
+              Yellow Network: {yellowError.message}
+            </p>
+          </div>
+        </Card>
       )}
 
       {cctpError && (recipient?.preferredChain === 'arc' || !recipient?.fastMode) && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4" />
-          <span>CCTP Settlement: {cctpError}</span>
-        </div>
+        <Card variant="default" padding="sm" className="border-accent-red/20 bg-accent-red/5 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-accent-red flex-shrink-0" />
+            <p className="text-sm text-accent-red">
+              CCTP Settlement: {cctpError}
+            </p>
+          </div>
+        </Card>
       )}
 
+      {/* Submit Button */}
       <Button
         type="submit"
         disabled={!isValid || (needsYellowAuth && yellowConnecting) || (cctpStatus !== 'idle' && cctpStatus !== 'complete' && cctpStatus !== 'failed')}

@@ -1,18 +1,7 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/providers/Providers';
 import { Header } from '@/components/layout/Header';
 import './globals.css';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'FlashPay.ens — ENS Instant Payments',
@@ -25,13 +14,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-black font-sans text-white antialiased`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <Providers>
           <Header />
-          <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+          <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12 lg:px-8">{children}</main>
         </Providers>
       </body>
     </html>

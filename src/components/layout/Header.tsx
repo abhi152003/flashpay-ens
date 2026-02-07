@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Zap } from 'lucide-react';
+import { Zap, Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useState } from 'react';
 
 const navLinks = [
   { href: '/', label: 'Pay' },
@@ -13,38 +15,102 @@ const navLinks = [
 
 export function Header() {
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="border-b border-zinc-800 bg-black/50 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="rounded-lg bg-blue-600 p-1.5">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-white">FlashPay</span>
-            <span className="text-lg text-zinc-500">.ens</span>
-          </Link>
+    <header className="sticky top-0 z-50 border-b border-border/50 bg-surface/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 md:h-20 max-w-7xl items-center justify-between px-4 md:px-6 lg:px-8">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 md:gap-3 group" onClick={() => setMobileMenuOpen(false)}>
+          <div className="rounded-xl bg-primary p-1.5 md:p-2 transition-transform duration-300 group-hover:scale-110 shadow-md">
+            <Zap className="h-4 w-4 md:h-5 md:w-5 text-primary-foreground" />
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg md:text-xl font-display font-semibold text-text-primary">
+              FlashPay
+            </span>
+            <span className="text-lg md:text-xl font-display text-text-tertiary">.ens</span>
+          </div>
+        </Link>
 
-          <nav className="hidden items-center gap-1 sm:flex">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`relative rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                pathname === link.href
+                  ? 'bg-surface-elevated text-text-primary shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated/50'
+              }`}
+            >
+              {link.label}
+              {pathname === link.href && (
+                <span className="absolute inset-x-0 -bottom-px h-0.5 bg-primary rounded-full" />
+              )}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <ThemeToggle />
+          
+          {/* Desktop Connect Button */}
+          <div className="hidden sm:block">
+            <ConnectButton />
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="
+              md:hidden rounded-lg p-2 transition-all duration-200
+              bg-surface-elevated hover:bg-border
+              border border-border hover:border-border-hover
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
+              active:scale-95
+            "
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5 text-text-secondary" />
+            ) : (
+              <Menu className="h-5 w-5 text-text-secondary" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-border/50 bg-surface/95 backdrop-blur-xl animate-fade-in">
+          <nav className="px-4 py-4 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  pathname === link.href
-                    ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`
+                  block rounded-xl px-4 py-3 text-base font-medium transition-all duration-200
+                  ${pathname === link.href
+                    ? 'bg-surface-elevated text-text-primary shadow-sm border border-border'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated/50'
+                  }
+                `}
               >
                 {link.label}
               </Link>
             ))}
+            
+            {/* Mobile Connect Button */}
+            <div className="pt-2 sm:hidden">
+              <ConnectButton />
+            </div>
           </nav>
         </div>
-
-        <ConnectButton />
-      </div>
+      )}
     </header>
   );
 }
