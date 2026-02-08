@@ -37,7 +37,7 @@ export function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="
-        rounded-lg p-2 transition-all duration-200
+        cursor-pointer rounded-lg p-2 transition-all duration-200
         bg-surface-elevated hover:bg-border
         border border-border hover:border-border-hover
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2

@@ -39,16 +39,17 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`relative rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                pathname === link.href
-                  ? 'bg-surface-elevated text-text-primary shadow-sm'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated/50'
-              }`}
+              className={`
+                relative rounded-xl px-4 py-2 text-sm font-medium 
+                transition-all duration-200
+                ${
+                  pathname === link.href
+                    ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated/50'
+                }
+              `}
             >
               {link.label}
-              {pathname === link.href && (
-                <span className="absolute inset-x-0 -bottom-px h-0.5 bg-primary rounded-full" />
-              )}
             </Link>
           ))}
         </nav>
@@ -66,7 +67,7 @@ export function Header() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="
-              md:hidden rounded-lg p-2 transition-all duration-200
+              cursor-pointer md:hidden rounded-lg p-2 transition-all duration-200
               bg-surface-elevated hover:bg-border
               border border-border hover:border-border-hover
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary

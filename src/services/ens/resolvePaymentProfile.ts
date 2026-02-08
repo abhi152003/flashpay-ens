@@ -29,12 +29,18 @@ export async function resolvePaymentProfile(ensName: string): Promise<PaymentPro
     ? (preferredChain as ChainPreference)
     : DEFAULT_CHAIN;
 
+  const validTokens = ['USDC', 'USDT', 'DAI'];
+  const parsedToken = validTokens.includes(token || '')
+    ? (token as 'USDC' | 'USDT' | 'DAI')
+    : DEFAULT_TOKEN;
+
   return {
     ensName: normalizedName,
     resolvedAddress: address,
     displayName: displayName || null,
     preferredChain: parsedChain,
-    token: token === 'USDC' ? 'USDC' : DEFAULT_TOKEN,
+    preferredToken: parsedToken,
+    token: parsedToken, // Backward compatibility
     fastMode: fastMode === 'true',
     rawRecords: {
       [TEXT_RECORD_KEYS.PREFERRED_CHAIN]: preferredChain,

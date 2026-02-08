@@ -1,5 +1,6 @@
 export type PaymentStatus = 'idle' | 'confirming' | 'pending' | 'success' | 'failed';
 export type PaymentMode = 'fast' | 'onchain';
+export type PaymentChain = 'sepolia' | 'arc' | 'unknown';
 
 export interface Payment {
   id: string;
@@ -10,4 +11,5 @@ export interface Payment {
   status: PaymentStatus;
   createdAt: number;
   txHash?: string;
+  chain?: PaymentChain;
 }

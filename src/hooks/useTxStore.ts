@@ -1,59 +1,87 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
 import type { Payment } from '@/types/payments';
 
-const STORAGE_KEY = 'flashpay-transactions';
-
-let cachedTransactions: Payment[] = [];
-
-function getSnapshot(): Payment[] {
-  return cachedTransactions;
-}
-
-function getServerSnapshot(): Payment[] {
-  return [];
-}
-
-function subscribe(onStoreChange: () => void): () => void {
-  function handleStorage() {
-    loadFromStorage();
-    onStoreChange();
-  }
-  window.addEventListener('storage', handleStorage);
-  loadFromStorage();
-  onStoreChange();
-  return () => window.removeEventListener('storage', handleStorage);
-}
-
-function loadFromStorage() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    cachedTransactions = stored ? JSON.parse(stored) : [];
-  } catch {
-    cachedTransactions = [];
-  }
-}
-
-function saveToStorage(transactions: Payment[]) {
-  cachedTransactions = transactions;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-}
-
 export function useTxStore() {
-  const transactions = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { address } = useAccount();
+  const [transactions, setTransactions] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addTransaction = useCallback((tx: Payment) => {
-    const updated = [tx, ...cachedTransactions];
-    saveToStorage(updated);
+  // Fetch transactions when wallet address changes
+  useEffect(() => {
+    if (!address) {
+      setTransactions([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/transactions?walletAddress=${address}`);
+        if (response.ok) {
+          const data = await response.json();
+          setTransactions(data);
+        }
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [address]);
+
+  const addTransaction = useCallback(async (tx: Payment) => {
+    if (!address) {
+      console.error('No wallet address connected');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...tx,
+          walletAddress: address,
+        }),
+      });
+
+      if (response.ok) {
+        const newTx = await response.json();
+        setTransactions((prev) => [newTx, ...prev]);
+      }
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
+  }, [address]);
+
+  const updateTransaction = useCallback(async (id: string, updates: Partial<Payment>) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.ok) {
+        const updatedTx = await response.json();
+        setTransactions((prev) =>
+          prev.map((tx) => (tx.id === id ? updatedTx : tx))
+        );
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+    }
   }, []);
 
-  const updateTransaction = useCallback((id: string, updates: Partial<Payment>) => {
-    const updated = cachedTransactions.map((tx) =>
-      tx.id === id ? { ...tx, ...updates } : tx
-    );
-    saveToStorage(updated);
-  }, []);
-
-  return { transactions, addTransaction, updateTransaction };
+  return { transactions, addTransaction, updateTransaction, loading };
 }

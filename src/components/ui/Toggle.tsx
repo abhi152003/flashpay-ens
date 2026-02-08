@@ -21,7 +21,7 @@ export function Toggle({ label, description, checked, onChange }: ToggleProps) {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+        className={`cursor-pointer relative h-6 w-11 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
           checked ? 'bg-primary shadow-md' : 'bg-border hover:bg-border-hover'
         }`}
       >

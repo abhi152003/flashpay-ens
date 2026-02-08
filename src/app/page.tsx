@@ -12,16 +12,17 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center space-y-4 md:space-y-6">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold tracking-tight">
-          Pay anyone by their{' '}
+          Send crypto to any{' '}
           <span className="relative inline-block">
             <span className="relative z-10 bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
-              .eth name
+              .ens name
             </span>
             <span className="absolute inset-0 blur-xl bg-gradient-to-r from-primary/30 to-primary-hover/30 animate-pulse" />
           </span>
         </h1>
         <p className="text-base sm:text-lg md:text-xl text-text-secondary max-w-2xl mx-auto font-medium px-4">
-          Instantly. Gasless. Cross-chain. The simplest way to send crypto.
+          Your recipient gets paid in their preferred token, on their preferred chain.{' '}
+          <span className="text-text-primary">Gasless. Instant. Seamless.</span>
         </p>
       </div>
 

@@ -9,7 +9,7 @@ import { Toggle } from '@/components/ui/Toggle';
 import { Card } from '@/components/ui/Card';
 import { CheckCircle2, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
 import { CHAIN_OPTIONS, TEXT_RECORD_KEYS } from '@/config/ens';
-import { chainLabels } from '@/config/chains';
+import { chainLabels, chainTokenSupport } from '@/config/chains';
 import { getEnsNameForAddress, resolvePaymentProfile } from '@/services/ens/resolvePaymentProfile';
 import {
   ENS_PUBLIC_RESOLVER_ABI,
@@ -35,6 +35,7 @@ export function ProfileSettingsForm() {
   const [chain, setChain] = useState<ChainPreference>('ethereum');
   const [fastMode, setFastMode] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [preferredToken, setPreferredToken] = useState('USDC');
 
   useEffect(() => {
     async function loadProfile() {
@@ -48,6 +49,7 @@ export function ProfileSettingsForm() {
           setChain(profile.preferredChain);
           setFastMode(profile.fastMode);
           setDisplayName(profile.displayName || '');
+          setPreferredToken(profile.preferredToken || 'USDC');
         }
       } catch (e) {
         console.error('Failed to load profile:', e);
@@ -57,6 +59,14 @@ export function ProfileSettingsForm() {
     }
     loadProfile();
   }, [address]);
+
+  // Auto-switch to USDC if selected token is not supported on selected chain
+  useEffect(() => {
+    const supportedTokens = chainTokenSupport[chain] || ['USDC'];
+    if (!supportedTokens.includes(preferredToken)) {
+      setPreferredToken('USDC');
+    }
+  }, [chain, preferredToken]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +94,7 @@ export function ProfileSettingsForm() {
         { key: TEXT_RECORD_KEYS.PREFERRED_CHAIN, value: chain },
         { key: TEXT_RECORD_KEYS.FAST_MODE, value: String(fastMode) },
         { key: TEXT_RECORD_KEYS.DISPLAY_NAME, value: displayName },
-        { key: TEXT_RECORD_KEYS.PREFERRED_TOKEN, value: 'USDC' },
+        { key: TEXT_RECORD_KEYS.PREFERRED_TOKEN, value: preferredToken },
       ];
 
       for (let i = 0; i < records.length; i++) {
@@ -154,7 +164,7 @@ export function ProfileSettingsForm() {
             Set a primary ENS name to configure payment preferences
           </p>
           <a 
-            href="https://app.ens.domains" 
+            href="https://sepolia.app.ens.domains/" 
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover transition-colors duration-200"
             target="_blank"
             rel="noopener noreferrer"
@@ -195,6 +205,32 @@ export function ProfileSettingsForm() {
           options={CHAIN_OPTIONS.map((c) => ({ value: c, label: chainLabels[c] }))}
         />
 
+        <div className="space-y-2">
+          <Select
+            label="Preferred Token"
+            value={preferredToken}
+            onChange={(e) => setPreferredToken(e.target.value)}
+            options={[
+              { value: 'USDC', label: 'USDC' },
+              { 
+                value: 'USDT', 
+                label: `USDT${!chainTokenSupport[chain]?.includes('USDT') ? ' (Unavailable)' : ''}`,
+                disabled: !chainTokenSupport[chain]?.includes('USDT')
+              },
+              { 
+                value: 'DAI', 
+                label: `DAI${!chainTokenSupport[chain]?.includes('DAI') ? ' (Unavailable)' : ''}`,
+                disabled: !chainTokenSupport[chain]?.includes('DAI')
+              },
+            ]}
+          />
+          {chain === 'arc' && preferredToken !== 'USDC' && (
+            <p className="text-xs text-text-tertiary">
+              Note: Arc Network only supports USDC natively
+            </p>
+          )}
+        </div>
+
         <Toggle
           label="Fast Mode"
           description="Enable gasless payments via Yellow Network state channels"
@@ -213,6 +249,11 @@ export function ProfileSettingsForm() {
             <span className="text-text-tertiary">•</span>
             <span>{TEXT_RECORD_KEYS.PREFERRED_CHAIN}:</span>
             <span className="text-text-primary font-medium">{chain}</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-text-tertiary">•</span>
+            <span>{TEXT_RECORD_KEYS.PREFERRED_TOKEN}:</span>
+            <span className="text-text-primary font-medium">{preferredToken}</span>
           </li>
           <li className="flex items-center gap-2">
             <span className="text-text-tertiary">•</span>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Send, Zap, Globe, Wallet, AlertCircle, ArrowRightLeft, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Send, Zap, Globe, Wallet, AlertCircle, ArrowRightLeft, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ENSInput } from '@/components/ens/ENSInput';
@@ -14,10 +15,13 @@ import type { PaymentStatus } from '@/types/payments';
 import type { Address } from 'viem';
 
 export function PaymentForm() {
+  const router = useRouter();
   const [ensName, setEnsName] = useState('');
   const [recipient, setRecipient] = useState<PaymentProfile | null>(null);
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState<PaymentStatus>('idle');
+  const [showAmountPrompt, setShowAmountPrompt] = useState(false);
+  const amountInputRef = useRef<HTMLInputElement>(null);
   const { addTransaction, updateTransaction } = useTxStore();
   const { balance, formatted, isLoading: balanceLoading, chainName } = useArcBalance();
 
@@ -48,6 +52,17 @@ export function PaymentForm() {
       connectYellow().catch(console.error);
     }
   }, [recipient?.fastMode, yellowAuthenticated, yellowConnecting, connectYellow]);
+
+  // Show amount prompt and focus input after Yellow Network connection
+  useEffect(() => {
+    if (recipient?.fastMode && yellowAuthenticated && !amount && !showAmountPrompt) {
+      setShowAmountPrompt(true);
+      setTimeout(() => {
+        amountInputRef.current?.focus();
+        setShowAmountPrompt(false);
+      }, 2000);
+    }
+  }, [recipient?.fastMode, yellowAuthenticated, amount, showAmountPrompt]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,17 +120,20 @@ export function PaymentForm() {
             updateTransaction(txId, {
               status: 'success',
               txHash: result.transferId,
+              chain: 'sepolia',
             });
           } else {
             updateTransaction(txId, {
               status: 'success',
               txHash: bridgeResult.mintTxHash || bridgeResult.burnTxHash || result.transferId,
+              chain: bridgeResult.mintTxHash ? 'arc' : 'sepolia',
             });
           }
         } else {
           updateTransaction(txId, {
             status: 'success',
             txHash: result.transferId,
+            chain: 'sepolia',
           });
         }
       } else {
@@ -131,15 +149,16 @@ export function PaymentForm() {
         updateTransaction(txId, {
           status: 'success',
           txHash: bridgeResult.mintTxHash || bridgeResult.burnTxHash,
+          chain: bridgeResult.mintTxHash ? 'arc' : 'sepolia',
         });
       }
 
       setStatus('success');
-      setAmount('');
-      setEnsName('');
-      setRecipient(null);
-
-      setTimeout(() => setStatus('idle'), 3000);
+      
+      // Redirect to history page after 1.5 seconds
+      setTimeout(() => {
+        router.push('/history');
+      }, 1500);
     } catch (error) {
       console.error('Payment failed:', error);
       updateTransaction(txId, { status: 'failed' });
@@ -192,6 +211,7 @@ export function PaymentForm() {
         </div>
         <div className="relative">
           <input
+            ref={amountInputRef}
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -210,6 +230,19 @@ export function PaymentForm() {
             USDC
           </span>
         </div>
+        
+        {/* Amount Prompt after Yellow connection */}
+        {showAmountPrompt && (
+          <Card variant="default" padding="sm" className="border-accent-green/20 bg-accent-green/5 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-accent-green flex-shrink-0" />
+              <p className="text-sm text-accent-green font-medium">
+                Connected! Now enter the amount to send
+              </p>
+              <ArrowRight className="h-4 w-4 text-accent-green animate-pulse" />
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Payment Route Info */}

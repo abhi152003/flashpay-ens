@@ -35,6 +35,14 @@ export const chainLabels: Record<string, string> = {
   arbitrum: 'Arbitrum',
 };
 
+// Token support by chain
+export const chainTokenSupport: Record<string, string[]> = {
+  arc: ['USDC'], // Arc only supports USDC (native currency)
+  ethereum: ['USDC', 'USDT', 'DAI'],
+  polygon: ['USDC', 'USDT', 'DAI'],
+  arbitrum: ['USDC', 'USDT', 'DAI'],
+};
+
 export const CCTP_TOKEN_MESSENGER = '0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA' as const;
 export const CCTP_MESSAGE_TRANSMITTER = '0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275' as const;
 

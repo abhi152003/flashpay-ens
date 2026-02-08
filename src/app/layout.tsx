@@ -6,6 +6,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'FlashPay.ens — ENS Instant Payments',
   description: 'Pay anyone by their .eth name. Instantly. Gasless.',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({

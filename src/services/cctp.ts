@@ -1,4 +1,4 @@
-import { encodeFunctionData, type Address, type Hex, pad } from 'viem';
+import { encodeFunctionData, type Address, type Hex, pad, createPublicClient, http } from 'viem';
 import {
     CCTP_TOKEN_MESSENGER,
     SEPOLIA_USDC_ADDRESS,
@@ -7,6 +7,12 @@ import {
 } from '@/config/chains';
 import { sepolia } from 'wagmi/chains';
 import type { WalletClient } from 'viem';
+
+// Create a public client for reading transaction receipts
+const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: http(),
+});
 
 const USDC_APPROVE_ABI = [
     {
@@ -89,6 +95,11 @@ async function approveUSDC(
     });
 
     console.log(`✅ USDC Approval Tx: ${txHash}`);
+    
+    // Wait for approval transaction confirmation
+    await publicClient.waitForTransactionReceipt({ hash: txHash });
+    console.log(`✅ Approval confirmed`);
+    
     return txHash;
 }
 

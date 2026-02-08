@@ -86,12 +86,18 @@ function TxRow({ tx }: { tx: Payment }) {
       {tx.txHash && tx.status === 'success' && (
         <div className="mt-3 pt-3 border-t border-border/50">
           <a
-            href={`https://sepolia.etherscan.io/tx/${tx.txHash}`}
+            href={
+              tx.chain === 'arc'
+                ? `https://testnet.arcscan.app/tx/${tx.txHash}`
+                : `https://sepolia.etherscan.io/tx/${tx.txHash}`
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs text-text-secondary hover:text-primary transition-colors duration-200"
           >
-            <span>View transaction</span>
+            <span>
+              View on {tx.chain === 'arc' ? 'Arcscan' : 'Etherscan'}
+            </span>
             <ExternalLink className="h-3 w-3" />
           </a>
         </div>
@@ -101,7 +107,22 @@ function TxRow({ tx }: { tx: Payment }) {
 }
 
 export function TxList() {
-  const { transactions } = useTxStore();
+  const { transactions, loading } = useTxStore();
+
+  if (loading) {
+    return (
+      <Card variant="elevated" padding="lg" className="text-center space-y-3 animate-fade-in">
+        <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-surface-elevated flex items-center justify-center">
+          <Clock className="h-7 w-7 sm:h-8 sm:w-8 text-text-tertiary animate-pulse" />
+        </div>
+        <div>
+          <p className="font-display font-semibold text-text-primary text-base sm:text-lg">
+            Loading transactions...
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   if (transactions.length === 0) {
     return (
