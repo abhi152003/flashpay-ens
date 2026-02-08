@@ -59,12 +59,10 @@ class YellowNetworkClient {
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
-        console.log('✅ Connected to Yellow Network');
         resolve();
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
         reject(new Error('Failed to connect to Yellow Network'));
       };
 
@@ -73,7 +71,6 @@ class YellowNetworkClient {
       };
 
       this.ws.onclose = () => {
-        console.log('WebSocket closed');
         this.isAuthenticatedFlag = false;
       };
     });
@@ -117,9 +114,7 @@ class YellowNetworkClient {
       const assetsRaw = await this.sendAndWait(assetsMsg, assetsRequestId);
       const assetsResponse = parseGetAssetsResponse(assetsRaw);
       this.supportedAssets = assetsResponse.params.assets || [];
-      console.log('📦 Supported assets:', this.supportedAssets.map(a => `${a.symbol} (${a.token})`));
     } catch (err) {
-      console.warn('⚠️ Could not fetch assets, proceeding with empty allowances:', err);
     }
 
     const stablecoinAsset = this.supportedAssets.find(
@@ -133,9 +128,7 @@ class YellowNetworkClient {
       : [];
 
     if (!stablecoinAsset) {
-      console.warn('⚠️ No USD stablecoin found in supported assets, proceeding without allowances');
     } else {
-      console.log(`✅ Using stablecoin asset: ${stablecoinAsset.symbol}`);
     }
 
     const sessionPrivateKey = generatePrivateKey();
@@ -181,7 +174,6 @@ class YellowNetworkClient {
 
     if (verifyResponse.params.success) {
       this.isAuthenticatedFlag = true;
-      console.log('✅ Authenticated with Yellow Network');
     } else {
       throw new Error('Authentication failed');
     }
@@ -229,7 +221,6 @@ class YellowNetworkClient {
 
     const amountInSmallestUnits = (parseFloat(params.amount) * Math.pow(10, decimals)).toFixed(0);
 
-    console.log(`💸 Transferring ${params.amount} ${assetIdentifier} (${amountInSmallestUnits} smallest units) to ${params.to}`);
 
     const requestId = this.requestIdCounter++;
 
@@ -247,7 +238,6 @@ class YellowNetworkClient {
       const resultRaw = await this.sendAndWait(transferMsg, requestId);
       const result = parseTransferResponse(resultRaw);
 
-      console.log('✅ Transfer successful:', result);
 
       return {
         transferId: result.params.transactions?.[0]?.id?.toString() || `ytx-${Date.now()}`,
@@ -340,7 +330,6 @@ export async function settleChannel(_sessionId: string): Promise<{
   txHash: string;
   status: 'settled';
 }> {
-  console.log('Channel settlement requested');
   return {
     txHash: `0x${Math.random().toString(16).slice(2)}`,
     status: 'settled',

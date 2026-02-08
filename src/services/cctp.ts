@@ -78,8 +78,6 @@ async function approveUSDC(
     walletClient: WalletClient,
     amount: bigint
 ): Promise<Hex> {
-    console.log('🔓 Approving USDC...');
-
     const data = encodeFunctionData({
         abi: USDC_APPROVE_ABI,
         functionName: 'approve',
@@ -94,12 +92,9 @@ async function approveUSDC(
         gas: BigInt(100000),
     });
 
-    console.log(`✅ USDC Approval Tx: ${txHash}`);
-    
     // Wait for approval transaction confirmation
     await publicClient.waitForTransactionReceipt({ hash: txHash });
-    console.log(`✅ Approval confirmed`);
-    
+
     return txHash;
 }
 
@@ -111,13 +106,9 @@ async function burnUSDC(
     destinationAddress: Address,
     maxFee: bigint = DEFAULT_FAST_TRANSFER_MAX_FEE
 ): Promise<Hex> {
-    console.log('🔥 Burning USDC on Sepolia...');
-
     const destinationDomain = CCTP_DOMAINS['arc-testnet'];
     const mintRecipient = addressToBytes32(destinationAddress);
     const destinationCaller = addressToBytes32('0x0000000000000000000000000000000000000000' as Address);
-
-    console.log(`   Domain: ${destinationDomain}, MaxFee: ${maxFee}, Recipient: ${destinationAddress}`);
 
     const data = encodeFunctionData({
         abi: TOKEN_MESSENGER_ABI,
@@ -141,7 +132,6 @@ async function burnUSDC(
         gas: BigInt(300000),
     });
 
-    console.log(`✅ Burn Tx: ${txHash}`);
     return txHash;
 }
 
@@ -153,11 +143,8 @@ async function retrieveAttestation(
     maxRetries: number = ATTESTATION_MAX_RETRIES,
     retryIntervalMs: number = ATTESTATION_RETRY_INTERVAL_MS
 ): Promise<AttestationMessage> {
-    console.log('⏳ Waiting for attestation...');
-
     const sourceDomain = CCTP_DOMAINS['ethereum-sepolia'];
     const url = `${CIRCLE_ATTESTATION_API}/v2/messages/${sourceDomain}?transactionHash=${burnTxHash}`;
-    console.log(`   Attestation URL: ${url}`);
 
     for (let i = 0; i < maxRetries; i++) {
         try {
@@ -168,7 +155,7 @@ async function retrieveAttestation(
                     console.log(`⏳ Message not found yet (attempt ${i + 1}/${maxRetries})`);
                 } else {
                     console.warn(`Attestation API error: ${response.status} ${response.statusText}`);
-                }
+                } 
                 await new Promise(resolve => setTimeout(resolve, retryIntervalMs));
                 continue;
             }
@@ -177,15 +164,11 @@ async function retrieveAttestation(
             const firstMessage = data.messages?.[0];
 
             if (firstMessage?.status === 'complete') {
-                console.log('✅ Attestation retrieved!');
                 return firstMessage;
             }
 
-            const status = firstMessage?.status ?? 'no messages';
-            console.log(`⏳ Attestation status: ${status} (attempt ${i + 1}/${maxRetries})`);
             await new Promise(resolve => setTimeout(resolve, retryIntervalMs));
         } catch (error) {
-            console.warn('Attestation fetch error:', error);
             await new Promise(resolve => setTimeout(resolve, retryIntervalMs));
         }
     }
@@ -196,8 +179,6 @@ async function retrieveAttestation(
 async function settleOnArc(
     attestation: AttestationMessage
 ): Promise<string> {
-    console.log('🪙 Requesting relayer to mint on Arc...');
-
     const response = await fetch('/api/settle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,7 +194,6 @@ async function settleOnArc(
         throw new Error(result.error || 'Settlement failed on Arc');
     }
 
-    console.log(`✅ Relayer Mint Tx: ${result.mintTxHash}`);
     return result.mintTxHash;
 }
 
@@ -246,7 +226,6 @@ export async function bridgeUSDCToArc(
             mintTxHash,
         };
     } catch (error) {
-        console.error('CCTP Bridge failed:', error);
         return {
             status: 'failed',
             error: error instanceof Error ? error.message : 'Unknown error',

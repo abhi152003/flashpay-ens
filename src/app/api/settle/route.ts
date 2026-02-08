@@ -44,7 +44,6 @@ export async function POST(request: NextRequest) {
 
         const relayerPrivateKey = process.env.RELAYER_PRIVATE_KEY;
         if (!relayerPrivateKey) {
-            console.error('RELAYER_PRIVATE_KEY not configured');
             return NextResponse.json(
                 { error: 'Settlement service not configured' },
                 { status: 503 }
@@ -68,7 +67,6 @@ export async function POST(request: NextRequest) {
             transport: http(),
         });
 
-        console.log(`🪙 Relayer (${account.address}) minting on Arc...`);
 
         const data = encodeFunctionData({
             abi: MESSAGE_TRANSMITTER_ABI,
@@ -82,7 +80,6 @@ export async function POST(request: NextRequest) {
             gas: BigInt(300000),
         });
 
-        console.log(`✅ Relayer Mint Tx: ${txHash}`);
 
         const receipt = await publicClient.waitForTransactionReceipt({
             hash: txHash,
@@ -90,7 +87,6 @@ export async function POST(request: NextRequest) {
         });
 
         const isSuccess = receipt.status === 'success';
-        console.log(`   Receipt status: ${receipt.status}`);
 
         return NextResponse.json({
             status: isSuccess ? 'success' : 'failed',

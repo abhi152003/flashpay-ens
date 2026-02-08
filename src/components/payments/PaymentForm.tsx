@@ -105,10 +105,8 @@ export function PaymentForm() {
           throw new Error('Yellow transfer failed');
         }
 
-        console.log('✅ Yellow Network transfer complete, txId:', result.transferId);
 
         if (recipient.preferredChain === 'arc') {
-          console.log('🌉 Initiating CCTP settlement to Arc...');
 
           const bridgeResult = await cctpBridge(
             amount,
@@ -116,7 +114,6 @@ export function PaymentForm() {
           );
 
           if (bridgeResult.status === 'failed') {
-            console.error('CCTP settlement failed:', bridgeResult.error);
             updateTransaction(txId, {
               status: 'success',
               txHash: result.transferId,
@@ -160,7 +157,6 @@ export function PaymentForm() {
         router.push('/history');
       }, 1500);
     } catch (error) {
-      console.error('Payment failed:', error);
       updateTransaction(txId, { status: 'failed' });
       setStatus('failed');
       setTimeout(() => setStatus('idle'), 3000);
