@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/', label: 'Pay' },
   { href: '/profile', label: 'Profile' },
   { href: '/history', label: 'History' },
+  { href: '/showcase', label: 'Showcase' },
 ];
 
 export function Header() {

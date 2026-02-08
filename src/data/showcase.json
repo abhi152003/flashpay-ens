@@ -1,0 +1,306 @@
+{
+  "hero": {
+    "title": "FlashPay ENS",
+    "subtitle": "The Future of Instant Payments",
+    "tagline": "Pay anyone by their .eth name. Instantly. Gasless.",
+    "stats": [
+      {
+        "label": "Transaction Speed",
+        "value": "<1s",
+        "description": "Instant payment confirmation"
+      },
+      {
+        "label": "Gas Savings",
+        "value": "90%+",
+        "description": "Compared to traditional on-chain transfers"
+      },
+      {
+        "label": "User Experience",
+        "value": "Seamless",
+        "description": "No blockchain complexity exposed"
+      }
+    ]
+  },
+  "problem": {
+    "title": "Current Payment Challenges",
+    "impact": "Billions of dollars in global payments",
+    "description": "processed annually with significant friction",
+    "challenges": [
+      {
+        "icon": "users",
+        "title": "Complex Addressing",
+        "description": "40-character hex addresses are impossible to remember and prone to errors"
+      },
+      {
+        "icon": "lock",
+        "title": "High Transaction Costs",
+        "description": "Gas fees make small payments economically unviable"
+      },
+      {
+        "icon": "coins",
+        "title": "Slow Settlement",
+        "description": "Traditional blockchain transactions take minutes to confirm"
+      },
+      {
+        "icon": "workflow",
+        "title": "Poor User Experience",
+        "description": "Wallets, signatures, and blockchain complexity deter mainstream adoption"
+      }
+    ],
+    "jobToBeDone": "I want to send money to someone as easily as sending a text message, using just their name."
+  },
+  "solution": {
+    "title": "How FlashPay Works",
+    "subtitle": "Instant payments powered by cutting-edge Web3 infrastructure",
+    "flow": [
+      {
+        "step": 1,
+        "title": "ENS Resolution",
+        "description": "Enter any .eth name instead of a complex wallet address",
+        "example": "Pay alice.eth instead of 0x742d...3f5a",
+        "color": "indigo"
+      },
+      {
+        "step": 2,
+        "title": "State Channel Magic",
+        "description": "Payments happen off-chain through Yellow Network state channels",
+        "example": "Instant confirmation, no waiting for blocks",
+        "color": "purple"
+      },
+      {
+        "step": 3,
+        "title": "Zero Gas Fees",
+        "description": "No gas fees for individual transactions",
+        "example": "Send $1 or $10,000 with the same cost",
+        "color": "yellow"
+      },
+      {
+        "step": 4,
+        "title": "Automated Settlement",
+        "description": "Periodic on-chain settlement via Arc Protocol",
+        "example": "Batch multiple payments for efficiency",
+        "color": "green"
+      }
+    ]
+  },
+  "protocols": {
+    "title": "Built on Best-in-Class Infrastructure",
+    "subtitle": "Leveraging proven Web3 protocols for maximum performance",
+    "integrations": [
+      {
+        "name": "ENS",
+        "logo": "ens",
+        "description": "Human-Readable Addresses",
+        "features": [
+          "Resolve .eth names to wallet addresses",
+          "Support for all ENS records and metadata",
+          "Universal identity layer for Web3"
+        ],
+        "track": "Core Identity Infrastructure",
+        "amount": "Industry Standard",
+        "color": "blue"
+      },
+      {
+        "name": "Yellow Network",
+        "logo": "yellow",
+        "description": "Lightning-Fast State Channels",
+        "features": [
+          "Off-chain payment channels",
+          "Sub-second transaction finality",
+          "Unlimited throughput capacity"
+        ],
+        "track": "Payment Infrastructure",
+        "amount": "Enterprise Grade",
+        "color": "yellow"
+      },
+      {
+        "name": "Arc Protocol",
+        "logo": "arc",
+        "description": "Smart Settlement Layer",
+        "features": [
+          "Batch transaction settlement",
+          "Cross-chain compatibility",
+          "Automated reconciliation"
+        ],
+        "track": "Settlement Infrastructure",
+        "amount": "Production Ready",
+        "color": "green"
+      }
+    ],
+    "advantage": "The perfect combination for instant, gasless payments"
+  },
+  "useCases": {
+    "title": "Real-World Use Cases",
+    "subtitle": "Transforming how people and businesses handle payments",
+    "cases": [
+      {
+        "title": "Peer-to-Peer Payments",
+        "description": "Split dinner bills, share expenses, or send gifts using simple ENS names",
+        "icon": "users",
+        "benefits": [
+          "Send to vitalik.eth instead of copying addresses",
+          "Instant confirmation for time-sensitive payments",
+          "No gas fees eating into small amounts"
+        ]
+      },
+      {
+        "title": "E-Commerce & Retail",
+        "description": "Accept crypto payments without the complexity or high fees",
+        "icon": "building",
+        "benefits": [
+          "Checkout flow as simple as credit cards",
+          "No chargebacks or fraud",
+          "Lower fees than traditional processors"
+        ]
+      },
+      {
+        "title": "Creator Monetization",
+        "description": "Content creators receive tips and payments from fans globally",
+        "icon": "palette",
+        "benefits": [
+          "Direct payments with no intermediaries",
+          "Global audience without currency conversion",
+          "Instant access to funds"
+        ]
+      },
+      {
+        "title": "Freelance & Gig Work",
+        "description": "Get paid instantly for completed work, anywhere in the world",
+        "icon": "code",
+        "benefits": [
+          "No waiting for international wire transfers",
+          "Avoid high remittance fees",
+          "Guaranteed payment security"
+        ]
+      }
+    ]
+  },
+  "benefits": {
+    "title": "Why FlashPay ENS?",
+    "headline": "The Perfect Balance of Speed, Cost, and Simplicity",
+    "comparison": {
+      "before": {
+        "title": "Traditional Crypto Payments",
+        "description": "The current state of blockchain payments",
+        "drawbacks": [
+          "Complex 40-character addresses",
+          "High gas fees ($5-50 per transaction)",
+          "Slow confirmation times (1-15 minutes)",
+          "Poor user experience"
+        ]
+      },
+      "after": {
+        "title": "FlashPay ENS Experience",
+        "description": "Modern, instant payments built for mainstream adoption",
+        "advantages": [
+          "Simple ENS names (alice.eth)",
+          "Zero gas fees per transaction",
+          "Instant confirmation (<1 second)",
+          "Web2-level user experience"
+        ]
+      }
+    }
+  },
+  "enhancements": {
+    "title": "Potential Enhancements",
+    "subtitle": "Innovative features to expand FlashPay's capabilities",
+    "features": [
+      {
+        "name": "SplitStream Payments",
+        "category": "Revenue Sharing",
+        "description": "Stream payments to ENS names with automatic revenue splitting configured via ENS text records",
+        "benefits": [
+          "Pay protocol-team.eth and automatically split to alice.eth (40%), bob.eth (35%), treasury.eth (25%)",
+          "Update splits dynamically without smart contract changes",
+          "Perfect for DAOs, creator collaborations, and partnership payments"
+        ],
+        "impact": "high",
+        "complexity": "medium"
+      },
+      {
+        "name": "Payment Requests",
+        "category": "User Experience",
+        "description": "Generate shareable payment links with pre-filled amounts and messages",
+        "benefits": [
+          "Create invoice links: flashpay.app/pay/alice.eth?amount=100&memo=Invoice-123",
+          "Share via any messaging platform",
+          "Track payment status in real-time"
+        ],
+        "impact": "high",
+        "complexity": "low"
+      },
+      {
+        "name": "Recurring Subscriptions",
+        "category": "Automation",
+        "description": "Set up automatic recurring payments to any ENS name",
+        "benefits": [
+          "Weekly/monthly subscriptions to creators",
+          "Automated bill payments",
+          "Cancel or modify anytime"
+        ],
+        "impact": "high",
+        "complexity": "medium"
+      },
+      {
+        "name": "Multi-Sig Support",
+        "category": "Security",
+        "description": "Require multiple approvals for high-value payments",
+        "benefits": [
+          "Organization accounts with approval workflows",
+          "Set spending limits per user",
+          "Audit trail for all transactions"
+        ],
+        "impact": "medium",
+        "complexity": "high"
+      },
+      {
+        "name": "Payment Scheduling",
+        "category": "Automation",
+        "description": "Schedule payments for future dates with automatic execution",
+        "benefits": [
+          "Schedule salary payments in advance",
+          "Automatic bill payments on due dates",
+          "Vesting schedules for grants"
+        ],
+        "impact": "medium",
+        "complexity": "medium"
+      },
+      {
+        "name": "Cross-Chain Bridge",
+        "category": "Infrastructure",
+        "description": "Accept payments on any chain and settle on recipient's preferred chain",
+        "benefits": [
+          "Pay on Ethereum, receive on Arbitrum",
+          "Automatic bridging and currency conversion",
+          "Unified balance across all chains"
+        ],
+        "impact": "high",
+        "complexity": "high"
+      },
+      {
+        "name": "Fiat On/Off Ramps",
+        "category": "Mainstream Adoption",
+        "description": "Direct integration with bank accounts and credit cards",
+        "benefits": [
+          "Pay with credit card, recipient gets USDC",
+          "Withdraw directly to bank account",
+          "No need to understand crypto"
+        ],
+        "impact": "high",
+        "complexity": "high"
+      },
+      {
+        "name": "Analytics Dashboard",
+        "category": "Business Intelligence",
+        "description": "Comprehensive payment analytics and reporting",
+        "benefits": [
+          "Track spending patterns and trends",
+          "Export reports for accounting",
+          "Revenue forecasting for businesses"
+        ],
+        "impact": "medium",
+        "complexity": "low"
+      }
+    ]
+  }
+}
